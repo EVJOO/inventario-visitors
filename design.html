@@ -1,0 +1,1147 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>인벤타리오 2026 — 디자인 시안 v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap" rel="stylesheet">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<style>
+  @font-face{
+    font-family:'KkuBulLim';
+    src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2410-1@1.0/BMkkubulimTTF-Regular.woff2') format('woff2');
+    font-weight:normal;font-display:swap;
+  }
+  :root{
+    --display:"KkuBulLim","Black Han Sans",system-ui,sans-serif;
+    /* 브랜드 컬러는 유지 */
+    --ink:#1C2230;
+    --ink-2:#465268;
+    --ink-3:#8995A8;
+    --paper:#FBFDFF;
+    --panel:#FFFFFF;
+    --bg:#F4F6FA;
+    --hair:rgba(28,34,48,.08);
+    --hair-strong:rgba(28,34,48,.14);
+
+    /* 브랜드 4컬러 (메인 핑크 + 보조 3색) */
+    --pink:#FC59DE;     /* 메인 — 티켓·방문 진행 카드 */
+    --pink-soft:#FFE0F8;
+    --pink-deep:#E034C2;
+    --cyan:#0EB9EB;     /* 보조 — 저장 점·정보 액센트 */
+    --cyan-soft:#E6F7FE;
+    --green:#50F253;    /* 방문(체크) */
+    --green-soft:#E8FBE9;
+    --yellow:#F6EB3C;   /* 찜(별) */
+    --yellow-soft:#FEFAD6;
+
+    /* 카테고리 8색 — 원본 PDF에서 추출한 정확한 값 */
+    --c-small:#F4B4C4;     --c-small-s:#FDEDF1;     /* 라이트 핑크 */
+    --c-workshop:#DCC400;  --c-workshop-s:#FAF3D0;  /* 머스타드 옐로우 */
+    --c-writing:#80DCF4;   --c-writing-s:#E6F8FD;   /* 라이트 시안 */
+    --c-daily:#388824;     --c-daily-s:#DBEBD2;     /* 다크 그린 */
+    --c-paper:#00B8F0;     --c-paper-s:#D6F1FB;     /* 브라이트 시안 */
+    --c-office:#4A4A4A;    --c-office-s:#E5E5E5;    /* 다크 그레이 */
+    --c-kiosk:#4CF448;     --c-kiosk-s:#DEFADD;     /* 라임 그린 */
+    --c-common:#8995A8;    --c-common-s:#E8ECF2;    /* 그레이 */
+
+    --radius-lg:24px;
+    --radius-md:18px;
+    --radius-sm:12px;
+    --shadow-card:0 8px 24px rgba(28,34,48,.06), 0 1px 0 rgba(28,34,48,.04);
+    --shadow-soft:0 2px 10px rgba(28,34,48,.04);
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased;}
+  html,body{font-family:"Pretendard",system-ui,sans-serif;color:var(--ink);}
+  body{
+    background:#EDEFF4;
+    padding:32px 16px 80px;
+    min-height:100vh;
+  }
+
+  /* ===== 시안 페이지 헤더 ===== */
+  .doc-header{max-width:1800px;margin:0 auto 32px;}
+  .doc-title{font-size:32px;font-weight:800;letter-spacing:-1px;line-height:1.1;}
+  .doc-sub{margin-top:8px;color:var(--ink-2);font-size:14px;line-height:1.6;}
+  .doc-sub b{color:var(--ink);font-weight:700;}
+  .legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+  .legend-chip{
+    background:var(--panel);border-radius:999px;
+    padding:7px 14px;font-size:12px;font-weight:600;color:var(--ink-2);
+    box-shadow:var(--shadow-soft);
+  }
+  .legend-chip b{color:var(--ink);font-weight:700;}
+
+  /* ===== 프레임 그리드 (지도 + 상세 모달) ===== */
+  .frames{
+    max-width:1100px;margin:0 auto;
+    display:grid;gap:28px;
+    grid-template-columns:minmax(0,1fr) 420px;
+    align-items:start;
+  }
+  @media (max-width:980px){.frames{grid-template-columns:1fr;max-width:560px;}}
+
+  .frame{
+    background:var(--bg);
+    border-radius:32px;
+    box-shadow:0 16px 40px rgba(28,34,48,.08), 0 1px 0 rgba(255,255,255,.6) inset;
+    overflow:hidden;
+    display:flex;flex-direction:column;
+  }
+  .frame.main{min-height:1200px;background:#FFFFF0;}
+  .frame.modal{min-height:600px;position:sticky;top:24px;}
+  .frame-label{
+    background:#fff;color:var(--ink);
+    font-size:13px;font-weight:700;padding:12px 18px;letter-spacing:0;
+    display:flex;justify-content:space-between;align-items:center;
+    border-bottom:1px solid var(--hair);
+  }
+  .frame-label small{color:var(--ink-3);font-weight:500;font-size:11px;}
+
+  /* ===== 앱 헤더 ===== */
+  .app-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 20px 12px;
+  }
+  .greet{font-size:11px;color:var(--ink-3);font-weight:600;letter-spacing:.3px;}
+  .wordmark{font-family:var(--display);font-size:22px;font-weight:400;letter-spacing:0;margin-top:1px;line-height:1;}
+  .save-pill{
+    display:inline-flex;align-items:center;gap:6px;
+    background:#fff;border-radius:999px;
+    padding:6px 12px 6px 10px;font-size:11px;font-weight:600;color:var(--ink-2);
+    box-shadow:var(--shadow-soft);
+  }
+  .save-pill::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--green);}
+
+  /* ===== 본문 ===== */
+  .app-body{padding:6px 16px 100px;flex:1;overflow:hidden;}
+
+  /* ===== 작은 메타 카드 (지도 상단) ===== */
+  .ticket-mini{
+    background:#F6EB3C;
+    border-radius:14px;
+    padding:10px 14px;
+    color:var(--ink);
+    margin:8px 0 14px;
+    box-shadow:0 4px 14px rgba(246,235,60,.35);
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+  }
+  .ticket-mini-body{min-width:0;flex:1;}
+  .ticket-mini-title{
+    font-family:var(--display);
+    font-size:17px;font-weight:400;line-height:1.05;letter-spacing:-.3px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .ticket-mini-meta{font-size:10.5px;font-weight:700;opacity:.75;margin-top:2px;letter-spacing:.2px;}
+  .ticket-mini-badge{
+    background:rgba(28,34,48,.13);border-radius:999px;
+    padding:5px 10px;font-size:10px;font-weight:800;letter-spacing:.5px;
+    flex:0 0 auto;
+  }
+
+  /* ===== 지도 카드 ===== */
+  .card{
+    background:var(--panel);
+    border-radius:var(--radius-md);
+    box-shadow:var(--shadow-card);
+    overflow:hidden;
+  }
+  .map-card{margin-bottom:16px;}
+  .map-head{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:14px 16px 10px;
+  }
+  .map-head .title{font-size:14px;font-weight:700;}
+  .map-zoom{
+    background:var(--ink);color:#fff;border:0;border-radius:999px;
+    padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;
+    display:inline-flex;align-items:center;gap:4px;
+  }
+  .map-scroll{overflow-x:auto;background:#F4F7FB;padding:6px 0;}
+  .map-scroll img{display:block;width:680px;max-width:none;}
+  .map-foot{
+    padding:10px 16px 14px;color:var(--ink-3);font-size:11px;font-weight:500;
+  }
+
+  /* ===== 홀별 배치도 카드 (강조) ===== */
+  .hall-card{
+    background:var(--panel);border-radius:20px;
+    box-shadow:var(--shadow-card);
+    overflow:hidden;
+    margin-bottom:14px;
+  }
+  .hall-head{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:14px 16px 10px;
+  }
+  .hall-title{
+    font-family:var(--display);
+    font-size:22px;font-weight:400;line-height:1;letter-spacing:-.3px;
+  }
+  .hall-title small{
+    font-family:"Pretendard";font-size:10px;font-weight:700;
+    color:var(--ink-3);letter-spacing:.8px;display:block;margin-bottom:4px;
+  }
+  .hall-zoom{
+    background:var(--ink);color:#fff;border:0;border-radius:999px;
+    padding:7px 13px;font-size:11px;font-weight:700;cursor:pointer;
+    display:inline-flex;align-items:center;gap:4px;
+  }
+  .hall-scroll{overflow-x:auto;background:#F4F7FB;padding:10px 0;}
+  .hall-scroll img{display:block;width:780px;max-width:none;}
+  .hall-foot{
+    padding:10px 16px 14px;color:var(--ink-3);font-size:11px;font-weight:500;
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .hall-foot .num{
+    background:var(--bg);padding:3px 8px;border-radius:999px;
+    font-weight:700;color:var(--ink-2);
+  }
+
+  /* ===== 부스 인덱스 (지도 페이지 하단) ===== */
+  .booth-index{
+    background:var(--panel);border-radius:20px;
+    box-shadow:var(--shadow-card);
+    overflow:hidden;margin-top:18px;
+  }
+  .index-head{
+    padding:16px 16px 12px;
+  }
+  .index-title{
+    font-family:var(--display);
+    font-size:20px;font-weight:400;letter-spacing:-.2px;
+  }
+  .index-sub{font-size:11px;color:var(--ink-3);margin-top:2px;font-weight:500;}
+  .index-tabs{
+    background:var(--bg);border-radius:12px;padding:4px;
+    display:flex;margin:12px 16px 0;
+  }
+  .index-tab{
+    flex:1;background:transparent;border:0;
+    padding:8px 10px;border-radius:9px;
+    font-family:inherit;font-size:12px;font-weight:700;color:var(--ink-3);
+    cursor:pointer;text-align:center;
+  }
+  .index-tab.active{background:#fff;color:var(--ink);box-shadow:var(--shadow-soft);}
+  .index-body{padding:12px 16px 16px;}
+
+  /* 알파벳순 리스트 */
+  .alpha-group{margin-top:14px;}
+  .alpha-group:first-child{margin-top:6px;}
+  .alpha-letter{
+    font-family:var(--display);font-size:18px;font-weight:400;
+    color:var(--ink);padding-bottom:6px;border-bottom:1px solid var(--hair);margin-bottom:8px;
+    display:flex;align-items:baseline;gap:8px;
+  }
+  .alpha-letter small{font-family:"Pretendard";font-size:11px;font-weight:600;color:var(--ink-3);}
+  /* 공통 인덱스 행 (알파벳/카테고리 모두 동일 포맷) */
+  .idx-rows{display:flex;flex-direction:column;gap:6px;}
+  .idx-row{
+    display:flex;align-items:center;gap:10px;
+    padding:12px 12px;font-size:13px;
+    background:#fff;border-radius:12px;
+    box-shadow:0 1px 4px rgba(28,34,48,.04);
+    cursor:pointer;
+    transition:transform .08s, box-shadow .08s;
+  }
+  .idx-row:hover{box-shadow:0 4px 12px rgba(28,34,48,.08);}
+  .idx-row:active{transform:scale(.99);}
+  .idx-row .dot{width:9px;height:9px;border-radius:50%;flex:0 0 9px;}
+  .idx-row .code-block{
+    display:flex;flex-direction:column;align-items:flex-start;
+    min-width:54px;
+  }
+  .idx-row .code{
+    font-weight:800;color:var(--ink);font-size:12px;letter-spacing:.3px;
+  }
+  .idx-row .hall{
+    font-size:9.5px;font-weight:800;letter-spacing:.3px;
+    padding:1px 6px;border-radius:4px;margin-top:3px;
+  }
+  .idx-row .hall.p1{background:var(--yellow-soft);color:#7A6A0D;}
+  .idx-row .hall.p2{background:var(--cyan-soft);color:#0A85AC;}
+  .idx-row .hall.lounge{background:var(--c-common-s);color:#5B4DB0;}
+  .idx-row .name-block{flex:1;min-width:0;}
+  .idx-row .name{
+    font-weight:700;color:var(--ink);font-size:13.5px;line-height:1.25;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .idx-row .name-en{
+    font-size:10.5px;color:var(--ink-3);font-weight:500;margin-top:1px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .idx-row .actions{
+    display:flex;gap:4px;flex:0 0 auto;
+  }
+  .idx-toggle{
+    width:32px;height:32px;border-radius:9px;border:0;
+    background:var(--bg);color:var(--ink-3);
+    display:grid;place-items:center;cursor:pointer;
+    transition:all .1s;
+  }
+  .idx-toggle:hover{background:var(--hair);}
+  .idx-toggle svg{width:15px;height:15px;}
+  .idx-toggle.on-fav{background:var(--yellow);color:var(--ink);}
+  .idx-toggle.on-vis{background:var(--green);color:var(--ink);}
+  .idx-toggle.on-memo{background:var(--cyan);color:#fff;}
+
+  /* 토글 이모지 (찜·방문·메모 공통 활성/비활성) */
+  .idx-toggle .visit-em,
+  .idx-toggle .fav-em,
+  .idx-toggle .memo-em{
+    font-size:17px;line-height:1;
+    filter:grayscale(1) opacity(.32);
+    transition:filter .15s;
+  }
+  .idx-toggle.on-vis .visit-em,
+  .idx-toggle.on-fav .fav-em,
+  .idx-toggle.on-memo .memo-em{filter:none;}
+
+  .big-toggle .visit-em,
+  .big-toggle .fav-em,
+  .big-toggle .memo-em{
+    font-size:24px;line-height:1;
+    filter:grayscale(1) opacity(.4);
+  }
+  .big-toggle.on-vis .visit-em,
+  .big-toggle.on-fav .fav-em,
+  .big-toggle.on-memo .memo-em{filter:none;}
+
+  /* 카테고리별 그룹 헤더 */
+  .cat-group{margin-top:16px;}
+  .cat-group:first-child{margin-top:6px;}
+  .cat-head{
+    display:flex;align-items:center;gap:8px;margin-bottom:8px;
+    padding-bottom:6px;border-bottom:1px solid var(--hair);
+  }
+  .cat-chip{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:5px 10px;border-radius:999px;
+    font-size:11px;font-weight:800;
+  }
+  .cat-chip .dot{width:8px;height:8px;border-radius:50%;}
+  .cat-count{font-size:11px;color:var(--ink-3);font-weight:600;margin-left:auto;}
+
+  /* ===== 인덱스 검색 + 필터 ===== */
+  .idx-search{
+    display:flex;align-items:center;gap:10px;
+    background:var(--bg);border-radius:12px;
+    padding:11px 14px;margin:0 16px 10px;
+  }
+  .idx-search input{
+    flex:1;border:0;outline:0;background:transparent;
+    font-family:inherit;font-size:13.5px;color:var(--ink);font-weight:500;
+  }
+  .idx-search input::placeholder{color:var(--ink-3);font-weight:500;}
+  .idx-search svg{width:16px;height:16px;color:var(--ink-3);}
+  .idx-search-clear{
+    background:transparent;border:0;padding:2px 4px;color:var(--ink-3);
+    font-size:14px;cursor:pointer;
+  }
+  .idx-filter-chips{
+    display:flex;gap:6px;overflow-x:auto;padding:0 16px 10px;margin:0;
+    scrollbar-width:none;
+  }
+  .idx-filter-chips::-webkit-scrollbar{display:none;}
+  .idx-filter-chip{
+    flex:0 0 auto;
+    background:var(--bg);border-radius:999px;border:0;
+    padding:6px 12px;font-size:11.5px;font-weight:700;color:var(--ink-2);
+    white-space:nowrap;cursor:pointer;font-family:inherit;
+  }
+  .idx-filter-chip.active{background:var(--ink);color:#fff;}
+  .idx-filter-chip.fav{background:var(--yellow);color:var(--ink);}
+  .idx-filter-chip.fav.active{box-shadow:inset 0 0 0 2px var(--ink);}
+
+  /* 검색 결과 개수 표시 */
+  .idx-result-count{
+    padding:4px 16px 8px;
+    font-size:11px;color:var(--ink-3);font-weight:600;
+  }
+  .idx-result-count b{color:var(--ink);font-weight:800;}
+
+  /* ===== 검색 + 필터 (구) ===== */
+  .search{
+    display:flex;align-items:center;gap:10px;
+    background:var(--panel);border-radius:14px;
+    padding:12px 16px;margin:8px 0 14px;
+    box-shadow:var(--shadow-soft);
+  }
+  .search input{
+    flex:1;border:0;outline:0;background:transparent;
+    font-family:inherit;font-size:14px;color:var(--ink);font-weight:500;
+  }
+  .search input::placeholder{color:var(--ink-3);font-weight:500;}
+  .search svg{width:18px;height:18px;color:var(--ink-3);}
+
+  .chips{
+    display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:14px;
+    scrollbar-width:none;
+  }
+  .chips::-webkit-scrollbar{display:none;}
+  .chip{
+    flex:0 0 auto;
+    background:var(--panel);border-radius:999px;
+    padding:8px 14px;font-size:12px;font-weight:600;color:var(--ink-2);
+    box-shadow:var(--shadow-soft);
+    white-space:nowrap;cursor:pointer;display:inline-flex;align-items:center;gap:5px;
+  }
+  .chip.active{background:var(--ink);color:#fff;}
+  .chip.fav{background:var(--yellow);color:var(--ink);}
+  .chip.unvis{background:var(--cyan-soft);color:#0A85AC;}
+  .chip .num{font-weight:700;opacity:.7;margin-left:2px;}
+
+  /* ===== 부스 카드 (보더 없음, 카테고리 점 좌측) ===== */
+  .booth-list{display:flex;flex-direction:column;gap:10px;}
+  .booth{
+    background:var(--panel);border-radius:16px;
+    box-shadow:var(--shadow-soft);
+    display:flex;align-items:center;gap:12px;padding:14px;
+    cursor:pointer;
+  }
+  .booth-thumb{
+    width:46px;height:46px;border-radius:14px;flex:0 0 46px;
+    display:grid;place-items:center;
+    font-weight:800;font-size:13px;letter-spacing:.3px;
+  }
+  .booth-body{flex:1;min-width:0;}
+  .booth-top{display:flex;align-items:center;gap:8px;margin-bottom:3px;}
+  .booth-cat{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+  .booth-ko{font-weight:700;font-size:14px;line-height:1.25;}
+  .booth-en{font-size:11px;color:var(--ink-3);font-weight:500;margin-top:1px;}
+  .booth-memo{
+    display:inline-flex;align-items:center;gap:4px;
+    background:var(--yellow-soft);border-radius:6px;
+    padding:3px 7px;font-size:10px;font-weight:600;color:#998A0E;
+    margin-top:6px;
+  }
+  .booth-actions{
+    display:flex;gap:6px;align-items:center;
+  }
+  .toggle{
+    width:36px;height:36px;border-radius:12px;border:0;
+    background:var(--bg);color:var(--ink-3);
+    font-size:16px;display:grid;place-items:center;
+    cursor:pointer;transition:transform .1s;
+  }
+  .toggle.on-fav{background:var(--yellow);color:var(--ink);}
+  .toggle.on-vis{background:var(--green);color:var(--ink);}
+  .toggle svg{width:20px;height:20px;}
+
+  /* ===== 방문 진행 카드 (내 리스트, 스탬프 랠리 대체) ===== */
+  .progress-card{
+    background:linear-gradient(140deg, var(--pink) 0%, var(--pink-deep) 100%);
+    border-radius:var(--radius-lg);
+    padding:22px 22px 20px;
+    color:var(--ink);
+    margin:8px 0 18px;
+    box-shadow:0 10px 24px rgba(252,89,222,.32);
+    position:relative;overflow:hidden;
+  }
+  .progress-eyebrow{
+    display:inline-block;
+    background:rgba(28,34,48,.1);border-radius:999px;
+    padding:4px 10px;font-size:10px;font-weight:700;letter-spacing:.5px;
+  }
+  .progress-row{display:flex;align-items:flex-end;justify-content:space-between;margin-top:10px;gap:14px;}
+  .progress-num{font-family:var(--display);font-size:72px;font-weight:400;line-height:.9;letter-spacing:-2px;}
+  .progress-num small{font-family:var(--display);font-size:24px;font-weight:400;opacity:.55;letter-spacing:0;}
+  .progress-label{font-size:12px;font-weight:600;line-height:1.4;text-align:right;}
+  .progress-label b{display:block;font-size:13px;font-weight:700;margin-bottom:2px;}
+  .bar{
+    margin-top:16px;height:10px;background:rgba(255,255,255,.4);
+    border-radius:999px;overflow:hidden;
+  }
+  .bar > div{height:100%;background:var(--ink);border-radius:999px;width:42%;}
+  .progress-foot{
+    display:flex;justify-content:space-between;
+    margin-top:10px;font-size:11px;font-weight:600;opacity:.7;
+  }
+  .progress-deco{
+    position:absolute;right:-30px;bottom:-30px;width:140px;height:140px;
+    background:rgba(255,255,255,.12);border-radius:50%;
+  }
+
+  /* ===== 미니 카드 그리드 (내 리스트 통계) ===== */
+  .stat-row{
+    display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;
+  }
+  .stat{
+    background:var(--panel);border-radius:16px;padding:14px;
+    box-shadow:var(--shadow-soft);
+  }
+  .stat-ico{
+    width:32px;height:32px;border-radius:10px;display:grid;place-items:center;font-size:16px;
+  }
+  .stat-num{font-size:24px;font-weight:800;line-height:1;margin-top:10px;letter-spacing:-.5px;}
+  .stat-label{font-size:11px;color:var(--ink-2);font-weight:600;margin-top:3px;}
+  .stat.fav .stat-ico{background:var(--yellow-soft);color:#998A0E;}
+  .stat.vis .stat-ico{background:var(--green-soft);color:#1F8423;}
+
+  /* ===== 섹션 ===== */
+  .section{margin-top:20px;}
+  .section-title{
+    font-family:var(--display);
+    font-size:20px;font-weight:400;letter-spacing:-.2px;
+    display:flex;justify-content:space-between;align-items:baseline;
+    margin-bottom:10px;
+  }
+  .section-count{
+    font-family:"Pretendard";
+    font-size:11px;font-weight:600;color:var(--ink-3);
+    background:#fff;padding:3px 9px;border-radius:999px;
+    box-shadow:var(--shadow-soft);
+  }
+
+  .mini-list{display:flex;flex-direction:column;gap:8px;}
+  .mini{
+    background:var(--panel);border-radius:14px;
+    box-shadow:var(--shadow-soft);
+    padding:12px 14px;display:flex;align-items:center;gap:12px;
+  }
+  .mini-thumb{
+    width:36px;height:36px;border-radius:11px;flex:0 0 36px;
+    display:grid;place-items:center;
+    font-weight:800;font-size:11px;
+  }
+  .mini-name{font-weight:700;font-size:13px;line-height:1.2;}
+  .mini-memo{font-size:11px;color:var(--ink-3);margin-top:2px;font-weight:500;}
+  .mini-end{font-size:14px;color:var(--ink-3);}
+
+  .reset-btn{
+    margin-top:20px;width:100%;
+    background:var(--panel);border:0;border-radius:14px;
+    box-shadow:var(--shadow-soft);
+    padding:13px;font-weight:700;font-size:13px;color:#C13030;
+    font-family:inherit;cursor:pointer;
+  }
+
+  /* ===== 바텀시트 (상세) ===== */
+  .sheet-stage{position:relative;background:#1C2230;}
+  .scrim{
+    position:absolute;inset:0;
+    background:linear-gradient(to bottom, rgba(28,34,48,.85), rgba(28,34,48,.6) 40%, rgba(28,34,48,.85));
+    pointer-events:none;
+  }
+  .sheet{
+    position:relative;margin-top:130px;
+    background:var(--bg);
+    border-top-left-radius:28px;border-top-right-radius:28px;
+    padding:10px 20px 28px;
+  }
+  .grip{
+    width:42px;height:5px;background:rgba(28,34,48,.15);border-radius:99px;
+    margin:0 auto 14px;
+  }
+  .sheet-top{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .sheet-cat-chip{
+    display:inline-flex;align-items:center;gap:6px;
+    background:#fff;border-radius:999px;
+    padding:5px 11px;font-size:11px;font-weight:700;
+  }
+  .sheet-cat-chip .dot{width:8px;height:8px;border-radius:50%;}
+  .sheet-code{
+    background:var(--ink);color:#fff;
+    font-weight:800;font-size:11px;letter-spacing:.5px;
+    padding:4px 9px;border-radius:8px;
+  }
+  .sheet-ko{font-family:var(--display);font-size:34px;font-weight:400;line-height:1.05;margin-top:12px;letter-spacing:-.5px;}
+  .sheet-en{font-size:13px;color:var(--ink-2);margin-top:3px;font-weight:500;}
+  .sheet-actions{
+    display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px;
+  }
+  .big-toggle{
+    background:var(--panel);border:0;border-radius:16px;
+    box-shadow:var(--shadow-soft);
+    padding:16px 12px;text-align:left;font-weight:700;font-size:13px;
+    cursor:pointer;
+    display:flex;flex-direction:column;gap:8px;
+  }
+  .big-toggle .ico{
+    width:34px;height:34px;border-radius:12px;
+    background:var(--bg);display:grid;place-items:center;font-size:16px;color:var(--ink-3);
+  }
+  .big-toggle .label{font-size:13px;font-weight:700;}
+  .big-toggle .sub{font-size:11px;color:var(--ink-3);font-weight:500;}
+  .big-toggle.on-fav{background:var(--yellow);}
+  .big-toggle.on-fav .ico{background:rgba(28,34,48,.15);color:var(--ink);}
+  .big-toggle.on-fav .sub{color:rgba(28,34,48,.6);}
+  .big-toggle.on-vis{background:var(--green);}
+  .big-toggle.on-vis .ico{background:rgba(28,34,48,.15);color:var(--ink);}
+
+  .memo-label{margin-top:18px;font-size:11px;font-weight:700;color:var(--ink-3);letter-spacing:.3px;}
+  .memo{
+    margin-top:8px;width:100%;min-height:80px;
+    background:var(--panel);border:0;border-radius:14px;
+    box-shadow:var(--shadow-soft);
+    padding:12px 14px;font-family:inherit;font-size:13px;color:var(--ink);font-weight:500;
+    resize:none;outline:0;line-height:1.5;
+  }
+  .soon-box{
+    margin-top:16px;background:var(--panel);
+    border-radius:14px;
+    padding:12px 14px;font-size:11px;color:var(--ink-2);font-weight:500;
+    box-shadow:var(--shadow-soft);
+    display:flex;gap:10px;align-items:flex-start;
+  }
+  .soon-box .ico{
+    width:30px;height:30px;border-radius:10px;background:var(--bg);
+    display:grid;place-items:center;font-size:14px;flex:0 0 30px;
+  }
+  .soon-box b{display:block;color:var(--ink);font-size:12px;margin-bottom:2px;font-weight:700;}
+
+  /* ===== 하단 탭 내비 (라운드 pill 스타일) ===== */
+  .tabbar-wrap{padding:12px 16px 16px;}
+  .tabbar{
+    background:#fff;
+    border-radius:22px;
+    padding:6px;display:flex;
+    box-shadow:0 8px 24px rgba(28,34,48,.08);
+  }
+  .tab{
+    flex:1;
+    display:flex;flex-direction:column;align-items:center;gap:2px;
+    font-size:10px;font-weight:700;color:var(--ink-3);cursor:pointer;
+    padding:8px 0;border-radius:16px;
+  }
+  .tab .ico{font-size:18px;line-height:1;}
+  .tab.active{background:var(--ink);color:#fff;}
+  .tab.active .ico-bg{background:var(--yellow);}
+
+  /* ===== 메모 ===== */
+  .note{
+    max-width:1800px;margin:36px auto 0;
+    background:var(--panel);border-radius:20px;
+    box-shadow:var(--shadow-card);
+    padding:22px 26px;font-size:13px;line-height:1.7;
+  }
+  .note h3{font-size:18px;font-weight:800;margin-bottom:10px;letter-spacing:-.3px;}
+  .note ul{margin-left:18px;}
+  .note li{margin-bottom:4px;}
+  .note code{
+    background:var(--bg);border-radius:5px;
+    padding:1px 6px;font-size:12px;font-family:ui-monospace,monospace;
+  }
+  .v-pill{
+    display:inline-block;background:var(--ink);color:#fff;
+    padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;margin-right:6px;
+  }
+
+  /* ===== 아이콘 후보 비교 ===== */
+  .icon-compare{
+    max-width:1800px;margin:24px auto 0;
+    background:var(--panel);border-radius:20px;
+    box-shadow:var(--shadow-card);
+    padding:22px 26px;
+  }
+  .icon-compare h3{font-size:18px;font-weight:800;margin-bottom:6px;letter-spacing:-.3px;}
+  .icon-compare > p{color:var(--ink-2);font-size:13px;margin-bottom:18px;}
+  .icon-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:16px;
+  }
+  @media (max-width:768px){.icon-grid{grid-template-columns:1fr;}}
+  .icon-card{
+    background:var(--bg);border-radius:16px;padding:18px;
+  }
+  .icon-card h4{font-size:14px;font-weight:800;margin-bottom:4px;}
+  .icon-card .desc{font-size:12px;color:var(--ink-2);margin-bottom:14px;}
+  .icon-pair{display:flex;gap:10px;align-items:center;}
+  .icon-state{
+    flex:1;background:#fff;border-radius:12px;padding:14px 12px;text-align:center;
+    box-shadow:var(--shadow-soft);
+  }
+  .icon-state .demo{
+    width:46px;height:46px;border-radius:14px;margin:0 auto 8px;
+    display:grid;place-items:center;background:var(--bg);color:var(--ink-3);
+  }
+  .icon-state.on .demo{background:var(--green);color:var(--ink);}
+  .icon-state svg{width:24px;height:24px;}
+  .icon-state .label{font-size:11px;font-weight:700;color:var(--ink-2);}
+  .icon-state.on .label{color:var(--ink);}
+</style>
+</head>
+<body>
+
+<div class="doc-header">
+  <div class="doc-title"><span class="v-pill">v4.2</span>인벤타리오 2026 · 디자인 시안</div>
+  <div class="doc-sub">
+    <b>v4: 단일 페이지로 통합</b> — 부스 탭·내 리스트 탭 제거. 지도 + 진행률 + 부스 인덱스(검색·필터·3토글) 모두 한 페이지 스크롤.<br>
+    <b>v4.2: 3토글 모두 이모지로 통일</b> — 찜 <b>⭐️</b> · 방문 <b>✅</b> · 메모 <b>📝</b>. 비활성은 grayscale + opacity, 활성은 풀컬러 + 색 배경.
+  </div>
+
+  <!-- 원본 PDF 추출 카테고리 색 비교 -->
+  <div style="margin-top:18px;background:#fff;border-radius:18px;padding:18px 22px;box-shadow:var(--shadow-card);">
+    <div style="font-size:14px;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+      🎨 원본 PDF에서 추출한 8개 카테고리 색
+      <span style="font-weight:500;color:var(--ink-3);font-size:11px;">(v3.4 적용)</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;">
+      <div style="background:var(--c-small);color:var(--ink);padding:10px 12px;border-radius:10px;">
+        <div style="font-size:11px;font-weight:700;opacity:.85;">SMALL THING</div>
+        <div style="font-size:13px;font-weight:800;letter-spacing:.3px;">#F4B4C4</div>
+        <div style="font-size:10px;opacity:.7;">라이트 핑크</div>
+      </div>
+      <div style="background:var(--c-workshop);color:var(--ink);padding:10px 12px;border-radius:10px;">
+        <div style="font-size:11px;font-weight:700;opacity:.85;">WORKSHOP</div>
+        <div style="font-size:13px;font-weight:800;letter-spacing:.3px;">#DCC400</div>
+        <div style="font-size:10px;opacity:.7;">머스타드 옐로우</div>
+      </div>
+      <div style="background:var(--c-writing);color:var(--ink);padding:10px 12px;border-radius:10px;">
+        <div style="font-size:11px;font-weight:700;opacity:.85;">WRITING</div>
+        <div style="font-size:13px;font-weight:800;letter-spacing:.3px;">#80DCF4</div>
+        <div style="font-size:10px;opacity:.7;">라이트 시안</div>
+      </div>
+      <div style="background:var(--c-daily);color:#fff;padding:10px 12px;border-radius:10px;">
+        <div style="font-size:11px;font-weight:700;opacity:.85;">DAILY FINDS</div>
+        <div style="font-size:13px;font-weight:800;letter-spacing:.3px;">#388824</div>
+        <div style="font-size:10px;opacity:.7;">다크 그린</div>
+      </div>
+      <div style="background:var(--c-paper);color:var(--ink);padding:10px 12px;border-radius:10px;">
+        <div style="font-size:11px;font-weight:700;opacity:.85;">PAPER</div>
+        <div style="font-size:13px;font-weight:800;letter-spacing:.3px;">#00B8F0</div>
+        <div style="font-size:10px;opacity:.7;">브라이트 시안</div>
+      </div>
+      <div style="background:var(--c-office);color:#fff;padding:10px 12px;border-radius:10px;">
+        <div style="font-size:11px;font-weight:700;opacity:.85;">OFFICE</div>
+        <div style="font-size:13px;font-weight:800;letter-spacing:.3px;">#4A4A4A</div>
+        <div style="font-size:10px;opacity:.7;">다크 그레이</div>
+      </div>
+      <div style="background:var(--c-kiosk);color:var(--ink);padding:10px 12px;border-radius:10px;">
+        <div style="font-size:11px;font-weight:700;opacity:.85;">KIOSK</div>
+        <div style="font-size:13px;font-weight:800;letter-spacing:.3px;">#4CF448</div>
+        <div style="font-size:10px;opacity:.7;">라임 그린</div>
+      </div>
+      <div style="background:var(--c-common);color:#fff;padding:10px 12px;border-radius:10px;">
+        <div style="font-size:11px;font-weight:700;opacity:.85;">COMMON</div>
+        <div style="font-size:13px;font-weight:800;letter-spacing:.3px;">#8995A8</div>
+        <div style="font-size:10px;opacity:.7;">그레이</div>
+      </div>
+    </div>
+    <div style="margin-top:12px;font-size:11px;color:var(--ink-3);line-height:1.6;">
+      ⚠️ 원본은 회색 배경에서 디자인되어, 흰 배경 위에서는 <b>옐로우(#DCC400) · 라이트 시안(#80DCF4) · 라임 그린(#4CF448) · 라이트 핑크(#F4B4C4)</b>가 다소 옅게 보입니다. 부스 카드의 카테고리 라벨/점은 소프트 톤 배경 위에 풀 컬러로 적용해 가독성을 보완했어요.
+    </div>
+  </div>
+  <div class="legend">
+    <div class="legend-chip" style="background:var(--pink);color:var(--ink);"><b>메인</b> 핑크 #FC59DE</div>
+    <div class="legend-chip"><b>보조</b> 시안 #0EB9EB</div>
+    <div class="legend-chip"><b>방문</b> 그린 #50F253</div>
+    <div class="legend-chip"><b>찜</b> 옐로우 #F6EB3C</div>
+    <div class="legend-chip">본문 <b>Pretendard</b> · 큰 타이틀 <b>꾸불림체</b></div>
+  </div>
+</div>
+
+<div class="frames">
+
+  <!-- ============ 메인: 단일 페이지 (지도 + 진행 + 인덱스) ============ -->
+  <div class="frame main">
+    <div class="frame-label">📍 메인 페이지 <small>단일 페이지 · 스크롤로 모든 기능 접근</small></div>
+    <div class="app-body" style="padding-top:14px;">
+      <!-- 메타 카드 (핑크) - 앱 헤더 통합 -->
+      <div class="ticket-mini">
+        <div class="ticket-mini-body">
+          <div class="ticket-mini-title">인벤타리오 2026 문구페어</div>
+          <div class="ticket-mini-meta">COEX THE PLATZ · 06.10 — 14</div>
+        </div>
+        <div class="ticket-mini-badge">D-DAY</div>
+      </div>
+
+      <!-- 방문 진행율 -->
+      <div class="progress-card">
+        <div class="progress-deco"></div>
+        <div class="progress-eyebrow">방문 진행</div>
+        <div class="progress-row">
+          <div class="progress-num">18<small> / 115</small></div>
+          <div class="progress-label">
+            <b>전체 부스 중</b>16% 완료
+          </div>
+        </div>
+        <div class="bar"><div style="width:16%;"></div></div>
+        <div class="progress-foot">
+          <span>⭐ 찜 12곳</span>
+          <span>남은 부스 97곳</span>
+        </div>
+      </div>
+
+      <!-- PLATZ HALL 1 -->
+      <div class="hall-card">
+        <div class="hall-head">
+          <div class="hall-title"><small>FLOOR MAP</small>PLATZ HALL 1</div>
+          <button class="hall-zoom">⤢ 확대</button>
+        </div>
+        <div class="hall-scroll">
+          <img src="hall1.png" alt="PLATZ HALL 1 부스 배치도">
+        </div>
+        <div class="hall-foot">
+          <span>← 좌우로 밀어서 보기</span>
+          <span class="num">E·F·G·H·I·J·K·L 구역</span>
+        </div>
+      </div>
+
+      <!-- PLATZ HALL 2 -->
+      <div class="hall-card">
+        <div class="hall-head">
+          <div class="hall-title"><small>FLOOR MAP</small>PLATZ HALL 2</div>
+          <button class="hall-zoom">⤢ 확대</button>
+        </div>
+        <div class="hall-scroll">
+          <img src="hall2.png" alt="PLATZ HALL 2 부스 배치도">
+        </div>
+        <div class="hall-foot">
+          <span>← 좌우로 밀어서 보기</span>
+          <span class="num">A·B·C·D 구역 + LOUNGE</span>
+        </div>
+      </div>
+
+      <!-- 부스 인덱스 (검색 + 찜만 필터 + 알파벳/카테고리 탭 + 토글 행) -->
+      <div class="booth-index">
+        <div class="index-head">
+          <div class="index-title">전체 부스</div>
+          <div class="index-sub">115개 · 검색·찜·방문·메모 모두 여기서</div>
+        </div>
+
+        <!-- 검색 -->
+        <div class="idx-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input placeholder="이름 · 부스코드로 검색 (예: 파버, A03)">
+        </div>
+
+        <!-- 필터 칩 -->
+        <div class="idx-filter-chips">
+          <button class="idx-filter-chip active">전체 115</button>
+          <button class="idx-filter-chip fav">⭐ 찜만 12</button>
+          <button class="idx-filter-chip">미방문 97</button>
+          <button class="idx-filter-chip">메모 있음 4</button>
+        </div>
+
+        <!-- 정렬 탭 -->
+        <div class="index-tabs" style="margin-top:4px;">
+          <button class="index-tab active">알파벳순</button>
+          <button class="index-tab">카테고리별</button>
+        </div>
+
+        <!-- 알파벳순 (활성) -->
+        <div class="index-body">
+          <div class="idx-result-count">검색 결과 <b>115</b>개 · A∼M 그룹</div>
+
+          <div class="alpha-group">
+            <div class="alpha-letter">A <small>6개 · 모두 PLATZ 2</small></div>
+            <div class="idx-rows">
+
+              <!-- 찜 + 방문 + 메모 모두 활성 -->
+              <div class="idx-row">
+                <span class="dot" style="background:var(--c-paper)"></span>
+                <div class="code-block"><span class="code">A01</span><span class="hall p2">P2</span></div>
+                <div class="name-block">
+                  <div class="name">두성종이</div>
+                  <div class="name-en">DOOSUNG PAPER</div>
+                </div>
+                <div class="actions">
+                  <button class="idx-toggle" aria-label="찜하기">
+                    <span class="fav-em">⭐️</span>
+                  </button>
+                  <button class="idx-toggle" aria-label="방문 체크">
+                    <span class="visit-em">✅</span>
+                  </button>
+                  <button class="idx-toggle" aria-label="메모">
+                    <span class="memo-em">📝</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 찜만 활성 -->
+              <div class="idx-row">
+                <span class="dot" style="background:var(--c-small)"></span>
+                <div class="code-block"><span class="code">A02</span><span class="hall p2">P2</span></div>
+                <div class="name-block">
+                  <div class="name">mt × 롤드페인트</div>
+                  <div class="name-en">mt × rolledpaint</div>
+                </div>
+                <div class="actions">
+                  <button class="idx-toggle on-fav" aria-label="찜 해제">
+                    <span class="fav-em">⭐️</span>
+                  </button>
+                  <button class="idx-toggle" aria-label="방문 체크">
+                    <span class="visit-em">✅</span>
+                  </button>
+                  <button class="idx-toggle" aria-label="메모">
+                    <span class="memo-em">📝</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 찜 + 방문 + 메모 모두 활성 (대표 케이스) -->
+              <div class="idx-row">
+                <span class="dot" style="background:var(--c-writing)"></span>
+                <div class="code-block"><span class="code">A03</span><span class="hall p2">P2</span></div>
+                <div class="name-block">
+                  <div class="name">파버카스텔</div>
+                  <div class="name-en">FABER-CASTELL</div>
+                </div>
+                <div class="actions">
+                  <button class="idx-toggle on-fav" aria-label="찜 해제">
+                    <span class="fav-em">⭐️</span>
+                  </button>
+                  <button class="idx-toggle on-vis" aria-label="방문 완료">
+                    <span class="visit-em">✅</span>
+                  </button>
+                  <button class="idx-toggle on-memo" aria-label="메모 작성됨">
+                    <span class="memo-em">📝</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 방문만 활성 -->
+              <div class="idx-row">
+                <span class="dot" style="background:var(--c-writing)"></span>
+                <div class="code-block"><span class="code">A04</span><span class="hall p2">P2</span></div>
+                <div class="name-block">
+                  <div class="name">카키모리</div>
+                  <div class="name-en">KAKIMORI</div>
+                </div>
+                <div class="actions">
+                  <button class="idx-toggle" aria-label="찜하기">
+                    <span class="fav-em">⭐️</span>
+                  </button>
+                  <button class="idx-toggle on-vis" aria-label="방문 완료">
+                    <span class="visit-em">✅</span>
+                  </button>
+                  <button class="idx-toggle" aria-label="메모">
+                    <span class="memo-em">📝</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 모두 비활성 -->
+              <div class="idx-row">
+                <span class="dot" style="background:var(--c-daily)"></span>
+                <div class="code-block"><span class="code">A06</span><span class="hall p2">P2</span></div>
+                <div class="name-block">
+                  <div class="name">포인트오브뷰</div>
+                  <div class="name-en">POV</div>
+                </div>
+                <div class="actions">
+                  <button class="idx-toggle"><span class="fav-em">⭐️</span></button>
+                  <button class="idx-toggle"><span class="visit-em">✅</span></button>
+                  <button class="idx-toggle"><span class="memo-em">📝</span></button>
+                </div>
+              </div>
+
+              <!-- 찜+메모만 활성 -->
+              <div class="idx-row">
+                <span class="dot" style="background:var(--c-workshop)"></span>
+                <div class="code-block"><span class="code">A07</span><span class="hall p2">P2</span></div>
+                <div class="name-block">
+                  <div class="name">더한글</div>
+                  <div class="name-en">THE HANGEUL</div>
+                </div>
+                <div class="actions">
+                  <button class="idx-toggle on-fav"><span class="fav-em">⭐️</span></button>
+                  <button class="idx-toggle"><span class="visit-em">✅</span></button>
+                  <button class="idx-toggle on-memo"><span class="memo-em">📝</span></button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="alpha-group">
+            <div class="alpha-letter">K <small>9개 · 모두 PLATZ 1</small></div>
+            <div class="idx-rows">
+              <div class="idx-row">
+                <span class="dot" style="background:var(--c-kiosk)"></span>
+                <div class="code-block"><span class="code">K01</span><span class="hall p1">P1</span></div>
+                <div class="name-block">
+                  <div class="name">마크스</div>
+                  <div class="name-en">MARK'S</div>
+                </div>
+                <div class="actions">
+                  <button class="idx-toggle"><span class="fav-em">⭐️</span></button>
+                  <button class="idx-toggle on-vis"><span class="visit-em">✅</span></button>
+                  <button class="idx-toggle"><span class="memo-em">📝</span></button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="text-align:center;color:var(--ink-3);font-size:11px;margin-top:14px;font-weight:600;">… A∼L · M (총 115개)</div>
+        </div>
+      </div>
+
+      <!-- 카테고리별 탭 미리보기 -->
+      <div class="booth-index" style="margin-top:10px;background:var(--bg);">
+        <div class="index-head">
+          <div class="index-title" style="font-size:14px;">🔁 카테고리별 탭으로 전환 시</div>
+          <div class="index-sub">같은 토글·검색·필터 · 그룹만 카테고리로 묶임</div>
+          <div class="index-tabs" style="opacity:.85;margin-top:8px;">
+            <button class="index-tab">알파벳순</button>
+            <button class="index-tab active">카테고리별</button>
+          </div>
+        </div>
+        <div class="index-body">
+          <div class="cat-group">
+            <div class="cat-head">
+              <span class="cat-chip" style="background:var(--c-small-s);color:var(--c-small)"><span class="dot" style="background:var(--c-small)"></span>스몰띵</span>
+              <span class="cat-count">29개</span>
+            </div>
+            <div class="idx-rows">
+              <div class="idx-row">
+                <span class="dot" style="background:var(--c-small)"></span>
+                <div class="code-block"><span class="code">A02</span><span class="hall p2">P2</span></div>
+                <div class="name-block">
+                  <div class="name">mt × 롤드페인트</div>
+                  <div class="name-en">mt × rolledpaint</div>
+                </div>
+                <div class="actions">
+                  <button class="idx-toggle on-fav"><span class="fav-em">⭐️</span></button>
+                  <button class="idx-toggle"><span class="visit-em">✅</span></button>
+                  <button class="idx-toggle"><span class="memo-em">📝</span></button>
+                </div>
+              </div>
+              <div class="idx-row">
+                <span class="dot" style="background:var(--c-small)"></span>
+                <div class="code-block"><span class="code">E03</span><span class="hall p1">P1</span></div>
+                <div class="name-block">
+                  <div class="name">구버</div>
+                  <div class="name-en">GOOBER</div>
+                </div>
+                <div class="actions">
+                  <button class="idx-toggle"><span class="fav-em">⭐️</span></button>
+                  <button class="idx-toggle on-vis"><span class="visit-em">✅</span></button>
+                  <button class="idx-toggle on-memo"><span class="memo-em">📝</span></button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="text-align:center;color:var(--ink-3);font-size:11px;margin-top:14px;font-weight:600;">… 8개 카테고리 전체 (총 115개)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ============ 부스 상세 모달 (행 클릭 시) ============ -->
+  <div class="frame modal sheet-stage">
+    <div class="frame-label" style="background:rgba(255,255,255,.95);position:relative;z-index:2;">
+      🔍 부스 상세 <small>인덱스 행 탭 시</small>
+    </div>
+    <div class="scrim"></div>
+    <div class="sheet">
+      <div class="grip"></div>
+      <div class="sheet-top">
+        <span class="sheet-code">A03</span>
+        <span class="sheet-cat-chip"><span class="dot" style="background:var(--c-writing)"></span>필기·드로잉</span>
+      </div>
+      <div class="sheet-ko">파버카스텔</div>
+      <div class="sheet-en">FABER-CASTELL</div>
+
+      <div class="sheet-actions">
+        <button class="big-toggle on-fav">
+          <div class="ico">
+<span class="fav-em">⭐️</span>
+          </div>
+          <div>
+            <div class="label">찜한 부스</div>
+            <div class="sub">탭해서 해제</div>
+          </div>
+        </button>
+        <button class="big-toggle on-vis">
+          <div class="ico"><span class="visit-em">✅</span></div>
+          <div>
+            <div class="label">방문 완료</div>
+            <div class="sub">탭해서 해제</div>
+          </div>
+        </button>
+      </div>
+
+      <div class="memo-label" style="display:flex;align-items:center;gap:6px;">
+        <span style="font-size:14px;line-height:1;">📝</span>
+        메모 <span style="color:var(--cyan);font-weight:800;">작성됨</span>
+      </div>
+      <textarea class="memo" placeholder="이 부스에 대한 메모를 남겨보세요">잉크 시필해보기 — 색감 비교용 샘플 받기</textarea>
+    </div>
+  </div>
+
+</div>
+
+<div class="note">
+  <h3>🔄 v1 → v2 변경 요약</h3>
+  <ul>
+    <li><b>선 정리</b> — 2.5px 잉크 테두리 + 4px 하드 섀도우 전부 제거. 무테 카드 + <code>0 8px 24px rgba(28,34,48,.06)</code> 부드러운 그림자로 통일.</li>
+    <li><b>라운드 키움</b> — 카드 16→18px, 큰 카드 24px, 칩/탭 999px·22px.</li>
+    <li><b>스탬프 랠리 제거</b> — 도장 격자·-8° 회전 그래픽 삭제. 대신 <b>방문 진행 카드</b>(큰 숫자 5/12 + 진행 바) + <b>찜/방문 통계 미니 2개</b>로 단순화.</li>
+    <li><b>부스 카드 재배치</b> — 좌측 색 스트라이프 → <b>둥근 사각 썸네일(카테고리 소프트 톤 배경 + 부스코드)</b>로 변경. 카테고리 색이 점이 아니라 면으로 들어와 인지가 명확해짐.</li>
+    <li><b>탭바</b> — 흰 막대 → <b>둥근 pill 바</b>로. 활성 탭은 잉크 배경 + 흰 글씨로 강한 대비.</li>
+    <li><b>찜 / 방문 기능 완전 분리</b> ✨ <em>v3 업데이트</em> — 찜은 단순 마킹(별표). 방문은 전체 115개 부스 각각의 독립 상태(방문 전/후).<br>
+    진행 카드 기준 변경: <code>찜한 부스 중 N% 방문</code> → <b><code>전체 115개 중 18곳 방문 (16%)</code></b>.</li>
+    <li><b>단일 페이지 구조로 통합</b> ✨ <em>v4 업데이트</em>
+      <ul style="margin-top:6px;">
+        <li><b>부스 탭(②) · 내 리스트 탭(③) 제거</b> — 모든 기능을 메인 페이지 하나로 통합. 하단 탭바도 제거.</li>
+        <li><b>방문 진행율 카드 상단 이동</b> — 메타 카드 바로 아래에 <code>18/115 · 16% 완료</code> 풀폭 카드.</li>
+        <li><b>인덱스에 검색 + 필터 + 토글 통합</b>
+          <ul style="margin-top:4px;">
+            <li>🔎 부스 검색 input (이름 · 부스코드)</li>
+            <li>필터 칩: 전체 / ⭐ 찜만 / 미방문 / 메모 있음</li>
+            <li>탭: 알파벳순 ↔ 카테고리별 (같은 토글·검색 공유)</li>
+          </ul>
+        </li>
+        <li><b>행 강화</b> — 행 크기 키움(높이 ~56px). 각 행에 <b>3개 토글 + PLATZ 배지</b>:
+          <ul style="margin-top:4px;">
+            <li>⭐ 찜: 비활성=외곽선 별 / 활성=옐로우 배경 + 채워진 별</li>
+            <li>✓ 방문: 비활성=점선 빈 원 / 활성=그린 배경 + 체크 (도장 컨셉)</li>
+            <li>📝 메모: 비활성=외곽선 메모 / 활성=시안 배경 + 채움</li>
+          </ul>
+        </li>
+        <li><b>행 클릭 → 상세 모달</b> — 메모 내용 확인·편집·찜·방문 모두 가능.</li>
+        <li><b>방문 아이콘 디폴트 변경</b>: 별 도장(A안) → 체크 도장(B안). 찜의 별과 시각 구분 + "체크 표시 활성화" 요구에 부합.</li>
+        <li>데스크탑 그리드: 메인 페이지 + 상세 모달 = 2열 (모바일에선 단일 컬럼).</li>
+      </ul>
+    </li>
+    <li><b>카테고리 색 → 원본 PDF 추출값으로 교체</b> ✨ <em>v3.4 업데이트</em>
+      <ul style="margin-top:6px;">
+        <li>원본 PDF의 부스 코드 텍스트를 픽셀 단위 샘플링해 8개 카테고리 색 추출.</li>
+        <li>이전 시안의 임의 컬러(예: SMALL=#FF5C8A, PAPER=#57C84D)를 원본 값(SMALL=#F4B4C4, PAPER=#00B8F0)으로 전면 교체.</li>
+        <li>특히 <b>PAPER ↔ DAILY가 시안 ↔ 그린</b> 매핑(이전 시안은 반대)이 원본 의도였음 — 정정.</li>
+        <li>모든 사용처(부스 카드 썸네일, 카테고리 라벨, 인덱스 행 점, 미니 리스트, 진행 카드, 비교 박스)가 CSS 변수 한 줄 교체로 자동 반영.</li>
+        <li><b>가독성 보완</b>: 옐로우(#DCC400)·라이트 시안(#80DCF4)·라임 그린(#4CF448)·라이트 핑크(#F4B4C4)는 원본이 회색 배경 디자인이라 흰 배경에서 옅게 보임. 부스 카드는 <b>소프트 톤 배경 + 풀 컬러 텍스트</b>로 가독성 확보.</li>
+      </ul>
+    </li>
+    <li><b>지도 페이지 다듬기</b> ✨ <em>v3.3 업데이트</em>
+      <ul style="margin-top:6px;">
+        <li><b>헤더 중복 제거</b> — 지도 페이지에서만 <code>.app-head</code>(작은 wordmark·날짜) 제거하고 핑크 메타 카드만 남김. 정보 노출 1회로 정리.</li>
+        <li><b>인덱스 행 포맷 통일</b> — 카테고리별 2열 그리드 → 알파벳순과 동일한 <b>1열 행 포맷(<code>idx-row</code>)</b>으로 통합. UX 일관성 ↑.</li>
+        <li><b>PLATZ 위치 배지</b> — 모든 행 우측에 <span style="background:var(--yellow-soft);color:#7A6A0D;padding:1px 5px;border-radius:4px;font-size:10px;font-weight:800;">P1</span> · <span style="background:var(--cyan-soft);color:#0A85AC;padding:1px 5px;border-radius:4px;font-size:10px;font-weight:800;">P2</span> · <span style="background:var(--c-common-s);color:#5B4DB0;padding:1px 5px;border-radius:4px;font-size:10px;font-weight:800;">L</span> 색 구분 배지. 알파벳·카테고리 양쪽 동일.</li>
+        <li>매핑 기준: <b>A·B·C·D = PLATZ 2</b>, <b>E·F·G·H·I·J·K·L = PLATZ 1</b>, <b>M = LOUNGE</b>(공용 라운지).</li>
+      </ul>
+    </li>
+    <li><b>지도 페이지 재구성</b> ✨ <em>v3.2 업데이트</em>
+      <ul style="margin-top:6px;">
+        <li>핑크 메타 카드 <b>대폭 축소</b> — 한 줄짜리(타이틀 + 장소·날짜 + D-DAY 뱃지). 페이지 상단 공간 절약.</li>
+        <li><b>배치도 강조</b> — 흰 카드(라운드 20px) + 부드러운 그림자로 시각적 무게 ↑. 카테고리 범례 카드 제거(인덱스에서 대체).</li>
+        <li><b>PLATZ HALL 1 / HALL 2 분리</b> — 원본 PDF에서 각각 잘라서 별도 카드로. 카드별 가로 스크롤(폭 780px). 푸터에 해당 홀 구역(예: <code>A·B·C·D + LOUNGE</code>) 표기.</li>
+        <li><b>부스 인덱스 신설</b> — 배치도 아래 탭 컨트롤(<code>알파벳순 ↔ 카테고리별</code>). 알파벳순은 A∼L·M 그룹 헤더 + 행. 카테고리별은 8개 카테고리 칩 + 2열 행 그리드. 카테고리 점 색으로 색맥락 유지.</li>
+        <li>두 탭 모두 시안에 노출(아래쪽이 카테고리별 미리보기) — 실제 빌드 때는 한 번에 한 탭만 보임.</li>
+      </ul>
+    </li>
+    <li><b>방문 아이콘 → 스탬프 컨셉</b> ✨ <em>v3.1 업데이트</em> — "도장 누르기 전/후" 메타포. 비활성: 점선 빈 자리(아직 도장 안 찍힘). 활성: 그린 채움 + 살짝 기울어진(-10°) 도장 + 잉크 번짐 점.<br>
+    기본 적용: <b>A안 별 도장</b>. 다른 안: B안 체크 도장, C안 한글 "방" 도장. 시안 하단 비교 박스에서 직접 보고 선택.<br>
+    UI 텍스트는 "방문 전 / 방문 체크"로 그대로 유지(스탬프 메타포는 아이콘 비주얼에만).</li>
+    <li><b>폰트 — 하이브리드</b> ✨ <em>v2.1 업데이트</em> — 본문/카드/라벨은 <b>Pretendard</b>로 가독성 유지, <b>큰 타이틀에만 꾸불림체</b>를 액센트로 적용 → 귀엽고 키치한 인상.<br>
+    적용: <code>inventario</code> 워드마크 · 티켓 타이틀 · 방문 진행 큰 숫자 <code>5/12</code> · 상세 시트 부스명 · 섹션 타이틀(찜한 부스/방문 완료).<br>
+    제외: 부스 카드 한글명(14px) · 칩 · 버튼 · 본문 — 가독성 우선.</li>
+    <li><b>도트 패턴 배경 제거</b> — 깔끔한 <code>#F4F6FA</code> 단색 배경.</li>
+  </ul>
+  <h3 style="margin-top:18px;">🧐 확정해야 하는 결정 포인트 (v2)</h3>
+  <ul>
+    <li><b>티켓 히어로</b> — cyan 카드에 흩어진 원 데코 + 펀치홀 느낌의 이중 보더 원. 너무 가벼우면 잉크 데코를 더 넣을 수 있어요. 너무 화려하면 단순 카드로.</li>
+    <li><b>방문 진행 카드</b> — 큰 숫자(5/12) + 한 줄 진행 바. 다른 안: <em>원형 게이지</em>, <em>도넛 차트</em>, <em>일러스트 + 숫자</em>.</li>
+    <li><b>토글</b> — 카드 우측 별/체크 두 개를 가로 정렬. 한 손 엄지로 닿기 좋아요. 더 큰 사이즈가 좋으면 키움.</li>
+    <li><b>탭 아이콘</b> — 지금은 이모지(🗺️🏪📋). 라인 SVG 아이콘으로 교체하면 더 깔끔해져요. (레퍼런스 4번도 라인 아이콘)</li>
+    <li><b>꾸불림체 완전 제거 OK?</b> — prompt 사양엔 헤드라인용으로 적혀있었어요. 이번 v2에선 무드 통일을 위해 뺐는데, 브랜드 워드마크 하나에만 살리는 안도 가능합니다.</li>
+  </ul>
+</div>
+
+</body>
+</html>
